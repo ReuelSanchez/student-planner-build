@@ -28,6 +28,7 @@ const SettingsScreen = ({
   const [exportNumericProgress, setExportNumericProgress] = useState(0);
   const fileInputRef = useRef(null);
   const [isSecretModalOpen, setIsSecretModalOpen] = useState(false);
+  const [isInstructionModalOpen, setIsInstructionModalOpen] = useState(false);
   const [keystoreSecret, setKeystoreSecret] = useState('');
   const [copyButtonText, setCopyButtonText] = useState('Copy to Clipboard');
   const handleToggleChange = async () => {
@@ -196,7 +197,9 @@ jobs:
       zip.file('.github/workflows/build.yml', buildYmlContent);
       const readmeContent = `# How to Build Your Android App (APK)
 
-This project now includes the GitHub Actions workflow file needed to build your app! Getting your APK is easier than ever.
+> **VERY IMPORTANT:** This ZIP file contains a pre-configured GitHub Actions workflow file at \`.github/workflows/build.yml\`. This file is designed to build your app automatically and solves the \`exit code 130\` error. **You must use this file.**
+
+Getting your APK is now easier than ever. Follow these steps precisely.
 
 ## Step 1: Generate and Convert Your Signing Key
 
@@ -253,14 +256,16 @@ git push
         type: "blob"
       });
       saveAs(content, "project.zip");
+      setIsExporting(false);
       setExportProgress('Build successful! Your download will start now.');
       setExportNumericProgress(100);
+      setIsInstructionModalOpen(true); // Show instructions on success
     } catch (error) {
       console.error("Failed to export project:", error);
       const errorMessage = `Build failed: ${error instanceof Error ? error.message : String(error)}`;
       setExportProgress(errorMessage);
-    } finally {
       setIsExporting(false);
+    } finally {
       setTimeout(() => setExportProgress(null), 5000); // Clear message after 5s
     }
   };
@@ -324,7 +329,30 @@ git push
     className: "font-mono"
   }, "KEY_STORE_PASSWORD"), " and ", /*#__PURE__*/React.createElement("code", {
     className: "font-mono"
-  }, "KEY_PASSWORD"), " using the password you set when creating the keystore file.")))), /*#__PURE__*/React.createElement("div", {
+  }, "KEY_PASSWORD"), " using the password you set when creating the keystore file.")))), /*#__PURE__*/React.createElement(Modal, {
+    isOpen: isInstructionModalOpen,
+    onClose: () => setIsInstructionModalOpen(false),
+    title: "Export Successful! Next Steps"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "space-y-4 text-sm text-slate-700 dark:text-slate-300"
+  }, /*#__PURE__*/React.createElement("p", null, "Your project has been successfully exported as ", /*#__PURE__*/React.createElement("code", {
+    className: "font-mono bg-slate-100 dark:bg-slate-700 p-1 rounded text-sky-600 dark:text-sky-400"
+  }, "project.zip"), "."), /*#__PURE__*/React.createElement("ol", {
+    className: "list-decimal list-inside space-y-2"
+  }, /*#__PURE__*/React.createElement("li", null, "Unzip the downloaded ", /*#__PURE__*/React.createElement("code", {
+    className: "font-mono"
+  }, "project.zip"), " file."), /*#__PURE__*/React.createElement("li", null, "Follow the detailed instructions in the new ", /*#__PURE__*/React.createElement("code", {
+    className: "font-mono"
+  }, "README.md"), " file inside it.")), /*#__PURE__*/React.createElement("div", {
+    className: "p-3 bg-sky-50 dark:bg-sky-500/10 rounded-lg text-sky-800 dark:text-sky-200"
+  }, /*#__PURE__*/React.createElement("h4", {
+    className: "font-semibold"
+  }, "The Fix is Inside!"), /*#__PURE__*/React.createElement("p", null, "The zip file contains a pre-configured GitHub workflow (", /*#__PURE__*/React.createElement("code", {
+    className: "font-mono text-xs"
+  }, ".github/workflows/build.yml"), ") that will prevent the build error you were seeing.")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setIsInstructionModalOpen(false),
+    className: "w-full mt-2 py-2 px-4 bg-sky-600 text-white font-semibold rounded-lg shadow-md hover:bg-sky-700"
+  }, "Got It"))), /*#__PURE__*/React.createElement("div", {
     className: "space-y-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "p-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
@@ -399,6 +427,6 @@ git push
     className: "text-sm text-slate-600 dark:text-slate-400"
   }, "This Student Digital Planner helps you organize your academic life. All your data is stored securely on your device."), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-xs text-slate-400 dark:text-slate-500"
-  }, "Version 2.2.0"))));
+  }, "Version 2.3.0"))));
 };
 export default SettingsScreen;

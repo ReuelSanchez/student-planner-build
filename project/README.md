@@ -1,6 +1,8 @@
 # How to Build Your Android App (APK)
 
-This project now includes the GitHub Actions workflow file needed to build your app! Getting your APK is easier than ever.
+> **VERY IMPORTANT:** This ZIP file contains a pre-configured GitHub Actions workflow file at `.github/workflows/build.yml`. This file is designed to build your app automatically and solves the `exit code 130` error. **You must use this file.**
+
+Getting your APK is now easier than ever. Follow these steps precisely.
 
 ## Step 1: Generate and Convert Your Signing Key
 
