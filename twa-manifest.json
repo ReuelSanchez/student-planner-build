@@ -1,0 +1,89 @@
+{
+  "packageId": "app.netlify.bejewelled_platypus_cab6ac.twa",
+  "host": "bejewelled-platypus-cab6ac.netlify.app",
+  "name": "Student Digital Planner",
+  "launcherName": "Planner",
+  "display": "standalone",
+  "themeColor": "#0284C7",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#F8FAFC",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://bejewelled-platypus-cab6ac.netlify.app/icon-512.png",
+  "maskableIconUrl": "https://bejewelled-platypus-cab6ac.netlify.app/maskable-icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:\\Users\\engin\\android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "1",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "View Schedule",
+      "shortName": "Schedule",
+      "url": "https://bejewelled-platypus-cab6ac.netlify.app/?screen=schedule",
+      "chosenIconUrl": "https://bejewelled-platypus-cab6ac.netlify.app/icons/shortcut-schedule-96.png"
+    },
+    {
+      "name": "Check Grades",
+      "shortName": "Grades",
+      "url": "https://bejewelled-platypus-cab6ac.netlify.app/?screen=grades",
+      "chosenIconUrl": "https://bejewelled-platypus-cab6ac.netlify.app/icons/shortcut-grades-96.png"
+    },
+    {
+      "name": "Scan Document",
+      "shortName": "Scan",
+      "url": "https://bejewelled-platypus-cab6ac.netlify.app/?screen=scanner",
+      "chosenIconUrl": "https://bejewelled-platypus-cab6ac.netlify.app/icons/shortcut-scanner-96.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://bejewelled-platypus-cab6ac.netlify.app/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "playBilling": {
+      "enabled": true
+    },
+    "locationDelegation": {
+      "enabled": true
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://bejewelled-platypus-cab6ac.netlify.app/",
+  "minSdkVersion": 21,
+  "shareTarget": {
+    "action": "https://bejewelled-platypus-cab6ac.netlify.app/share-receiver",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "files": [
+        {
+          "name": "file",
+          "accept": [
+            "image/*"
+          ]
+        }
+      ]
+    }
+  },
+  "orientation": "portrait-primary",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "appVersion": "1"
+}
