@@ -172,8 +172,22 @@ jobs:
       with:
         node-version: '18'
 
-    - name: Install Bubblewrap
-      run: npm install -g @bubblewrap/cli
+    - name: Install Bubblewrap and HTTP Server
+      run: |
+        npm install -g @bubblewrap/cli
+        npm install -g http-server
+
+    - name: Start local server for PWA files
+      run: http-server . &
+
+    - name: Wait for server to be ready
+      run: sleep 5
+      
+    - name: Initialize Bubblewrap Project
+      # This step creates the twa-manifest.json and other Android project files
+      # by fetching the manifest from the local server. This automates the manual
+      # 'bubblewrap init' step that was previously required.
+      run: bubblewrap init --manifest http://127.0.0.1:8080/manifest.json
 
     - name: Decode Keystore
       run: echo "$\{{ secrets.KEY_STORE_BASE64 }}" | base64 --decode > android.keystore
@@ -181,8 +195,7 @@ jobs:
         KEY_STORE_BASE64: $\{{ secrets.KEY_STORE_BASE64 }}
 
     - name: Build the Android App
-      # The 'yes' command automatically answers 'y' to any prompts from the build tool,
-      # preventing the build from getting stuck in a non-interactive CI environment.
+      # The 'yes' command automatically answers 'y' to any prompts from the build tool.
       run: yes | bubblewrap build --skipPwaValidation --keystore android.keystore
       env:
         KEY_STORE_PASSWORD: $\{{ secrets.KEY_STORE_PASSWORD }}
@@ -197,13 +210,11 @@ jobs:
       zip.file('.github/workflows/build.yml', buildYmlContent);
       const readmeContent = `# How to Build Your Android App (APK)
 
-> **VERY IMPORTANT:** This ZIP file contains a pre-configured GitHub Actions workflow file at \`.github/workflows/build.yml\`. This file is designed to build your app automatically and solves the \`exit code 130\` error. **You must use this file.**
-
-Getting your APK is now easier than ever. Follow these steps precisely.
+The build process is now almost fully automated. You no longer need to run \`bubblewrap init\` yourself.
 
 ## Step 1: Generate and Convert Your Signing Key
 
-First, you need a digital signature.
+First, you need a digital signature for your app.
 
 1.  **Generate Key:** Open a terminal in your project folder and run this command to create an \`android.keystore\` file.
     \`\`\`bash
@@ -211,7 +222,7 @@ First, you need a digital signature.
     \`\`\`
     It will ask for a **password**. Remember this password!
 
-2.  **Convert Key:** Go back to the Student Planner app (**Settings > Prepare for Android Build**) and use the **"Convert .keystore File to Secret"** tool. This will give you a long string of text. Copy it.
+2.  **Convert Key:** Go back to the Student Planner app (**Settings > Automated Android Build**) and use the **"Convert .keystore File to Secret"** tool. This will give you a long string of text. Copy it.
 
 ## Step 2: Set up GitHub Secrets
 
@@ -221,33 +232,24 @@ In your GitHub repository, go to **Settings > Secrets and variables > Actions** 
 2.  **\`KEY_PASSWORD\`**: The same password.
 3.  **\`KEY_STORE_BASE64\`**: The long string of text you copied from the app.
 
-## Step 3: Host Your App & Initialize Bubblewrap
+## Step 3: Commit and Push
 
-Bubblewrap needs a live URL for your app's manifest.
-
-1.  **Host Files:** Go to **https://app.netlify.com/drop** and drag the entire unzipped folder (the one this README is in) onto the website. Copy the public URL it gives you.
-
-2.  **Initialize Project:** In your terminal, run the following command using your new URL. This creates essential Android project files.
-    \`\`\`bash
-    bubblewrap init --manifest https://your-netlify-url.netlify.app/manifest.json
-    \`\`\`
-    (Press \`Enter\` to accept the defaults for the questions).
-
-## Step 4: Commit Everything and Push
-
-This is the final step! The workflow file (\`.github/workflows/build.yml\`) is already in this project. You just need to commit it along with the new files from Bubblewrap.
+Unzip this project, commit all the files to your GitHub repository, and push them.
 
 \`\`\`bash
+# (After unzipping)
 git add .
-git commit -m "Configure Android build"
+git commit -m "Initial project setup for Android build"
 git push
 \`\`\`
 
-## Step 5: Run the Build
+## Step 4: Run the Build
+
+That's it!
 
 1.  Go to your GitHub repository and click the **"Actions"** tab.
 2.  Find the **"Build Android App"** workflow and click "Run workflow".
-3.  When it's done, you can download your \`app-release-signed.apk\` from the "Artifacts" section.
+3.  When it finishes, you can download your \`app-release-signed.apk\` from the "Artifacts" section.
 `;
       zip.file("README.md", readmeContent);
       setExportProgress('Packaging project...');
@@ -341,15 +343,15 @@ git push
     className: "list-decimal list-inside space-y-2"
   }, /*#__PURE__*/React.createElement("li", null, "Unzip the downloaded ", /*#__PURE__*/React.createElement("code", {
     className: "font-mono"
-  }, "project.zip"), " file."), /*#__PURE__*/React.createElement("li", null, "Follow the detailed instructions in the new ", /*#__PURE__*/React.createElement("code", {
+  }, "project.zip"), " file."), /*#__PURE__*/React.createElement("li", null, "Follow the new, simpler instructions in the ", /*#__PURE__*/React.createElement("code", {
     className: "font-mono"
   }, "README.md"), " file inside it.")), /*#__PURE__*/React.createElement("div", {
     className: "p-3 bg-sky-50 dark:bg-sky-500/10 rounded-lg text-sky-800 dark:text-sky-200"
   }, /*#__PURE__*/React.createElement("h4", {
     className: "font-semibold"
-  }, "The Fix is Inside!"), /*#__PURE__*/React.createElement("p", null, "The zip file contains a pre-configured GitHub workflow (", /*#__PURE__*/React.createElement("code", {
+  }, "Build is Now Automated!"), /*#__PURE__*/React.createElement("p", null, "The new workflow file handles everything. You no longer need to run ", /*#__PURE__*/React.createElement("code", {
     className: "font-mono text-xs"
-  }, ".github/workflows/build.yml"), ") that will prevent the build error you were seeing.")), /*#__PURE__*/React.createElement("button", {
+  }, "bubblewrap init"), " yourself!")), /*#__PURE__*/React.createElement("button", {
     onClick: () => setIsInstructionModalOpen(false),
     className: "w-full mt-2 py-2 px-4 bg-sky-600 text-white font-semibold rounded-lg shadow-md hover:bg-sky-700"
   }, "Got It"))), /*#__PURE__*/React.createElement("div", {
@@ -372,9 +374,9 @@ git push
     className: "p-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-6"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", {
     className: "text-lg font-bold text-slate-800 dark:text-slate-100 mb-2"
-  }, "Prepare for Android Build"), /*#__PURE__*/React.createElement("p", {
+  }, "Automated Android Build (APK)"), /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-slate-600 dark:text-slate-400 mb-4"
-  }, "Follow these steps to generate the files and instructions needed to build your APK with GitHub Actions.")), /*#__PURE__*/React.createElement("div", {
+  }, "This tool packages your app and creates a fully automated GitHub workflow to build your APK. No more manual command-line steps.")), /*#__PURE__*/React.createElement("div", {
     className: "space-y-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-start gap-4"
@@ -384,7 +386,7 @@ git push
     className: "font-bold text-slate-800 dark:text-slate-100"
   }, "Export Project Files"), /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-slate-600 dark:text-slate-400 mb-3"
-  }, "This compiles your app into a production-ready format and includes a README and a pre-configured GitHub workflow file."), /*#__PURE__*/React.createElement("button", {
+  }, "This compiles your app and bundles it with a new, fully automated GitHub workflow file."), /*#__PURE__*/React.createElement("button", {
     onClick: handleExport,
     disabled: isExporting,
     className: "w-full py-2 px-4 bg-sky-600 text-white font-semibold rounded-lg shadow-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
@@ -410,7 +412,7 @@ git push
     className: "font-bold text-slate-800 dark:text-slate-100"
   }, "Prepare Your Signing Key"), /*#__PURE__*/React.createElement("p", {
     className: "text-sm text-slate-600 dark:text-slate-400 mb-3"
-  }, "Your Android app needs a digital signature. Follow the instructions in the exported README to generate an `android.keystore` file, then use this tool to convert it into a secret for GitHub Actions."), /*#__PURE__*/React.createElement("input", {
+  }, "Generate an `android.keystore` file by following the instructions in the exported README, then use this tool to convert it into a secret for GitHub."), /*#__PURE__*/React.createElement("input", {
     type: "file",
     ref: fileInputRef,
     className: "hidden",
@@ -427,6 +429,6 @@ git push
     className: "text-sm text-slate-600 dark:text-slate-400"
   }, "This Student Digital Planner helps you organize your academic life. All your data is stored securely on your device."), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-xs text-slate-400 dark:text-slate-500"
-  }, "Version 2.3.0"))));
+  }, "Version 2.4.0"))));
 };
 export default SettingsScreen;
