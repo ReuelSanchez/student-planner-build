@@ -117,7 +117,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ notificationsEnabled, o
         for (let i = 0; i < scriptPaths.length; i++) {
             const path = scriptPaths[i];
             const progress = 10 + Math.round((i + 1) / scriptPaths.length * 60);
-            setExportProgress(`Transpiling: ${path}...`);
+            setExportProgress(`Transpiling (${i + 1}/${scriptPaths.length}): ${path}`);
             setExportNumericProgress(progress);
             
             let code = fileContents[path];
@@ -132,11 +132,16 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ notificationsEnabled, o
             transpiledFiles[newPath] = transformed;
             transpiledFilePaths.push(newPath);
 
-            if (i % 5 === 0) await new Promise(resolve => setTimeout(resolve, 0)); // Yield to main thread
+            // Yield to main thread frequently to keep the UI responsive during heavy processing.
+            if (i % 2 === 0) await new Promise(resolve => setTimeout(resolve, 0));
         }
 
         setExportProgress('Creating application structure...');
         setExportNumericProgress(75);
+        for(const path in transpiledFiles) {
+            zip.file(path, transpiledFiles[path]);
+        }
+        
         const originalHtml = fileContents['index.html'];
         const importMapMatch = originalHtml.match(/<script type="importmap">([\s\S]*?)<\/script>/s);
         const importMap = importMapMatch ? importMapMatch[0] : '';
@@ -191,7 +196,7 @@ In your GitHub repository, go to **Settings > Secrets and variables > Actions** 
 
 1.  **\`KEY_STORE_PASSWORD\`**: The password you created in Step 1.
 2.  **\`KEY_PASSWORD\`**: The same password.
-3.  **\`KEY_STORE_BASE64\`**: To get this value, go back to the Student Planner app, to **Settings > Build for Android**, and use the "Convert .keystore File to Secret" tool. It will generate the correct value for you to copy.
+3.  **\`KEY_STORE_BASE64\`**: To get this value, go back to the Student Planner app, to **Settings > Prepare for Android Build**, and use the "Convert .keystore File to Secret" tool. It will generate the correct value for you to copy.
 
 ## Step 4: Initialize Your Android Project
 
@@ -217,6 +222,18 @@ You're all set!
 1.  Go to your GitHub repository and click the **"Actions"** tab.
 2.  Find the **"Build Android App"** workflow and click "Run workflow".
 3.  When it's done, you can download your \`app-release-signed.apk\` from the "Artifacts" section.
+
+## Troubleshooting
+
+### My GitHub Action failed with "exit code 130"
+
+This is the most common issue and it usually means the build process was interrupted. This can happen for a few reasons:
+
+1.  **Missing Project Files:** The \`bubblewrap build\` command **failed to find the project files**. Did you run \`bubblewrap init\` locally and commit the new files (\`twa-manifest.json\`, \`.bubblewrap/\`, etc.) to your repository? This is the most common cause. Double-check your repository to ensure these files are present before running the Action.
+
+2.  **GitHub Actions Timeout:** The build process, especially the first time, can be slow because it needs to download Android tools. If it takes longer than GitHub's default timeout, the job will be cancelled. If this happens consistently, it might be a temporary GitHub issue. Try running the workflow again.
+
+3.  **Incorrect Secrets:** Double-check that your three secrets (\`KEY_STORE_PASSWORD\`, \`KEY_PASSWORD\`, \`KEY_STORE_BASE64\`) are correctly named and have the correct values, with no extra spaces or characters.
 `;
       zip.file("README.md", readmeContent);
 
@@ -321,9 +338,9 @@ You're all set!
 
         <div className="p-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-6">
             <div>
-              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">Build for Android</h2>
+              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">Prepare for Android Build</h2>
               <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                  Follow these steps to generate your APK file for the Google Play Store.
+                  Follow these steps to generate the files and instructions needed to build your APK with GitHub Actions.
               </p>
             </div>
 
@@ -388,6 +405,13 @@ You're all set!
                 </div>
               </div>
             </div>
+            
+            <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-500/10 border-l-4 border-amber-400 dark:border-amber-500 space-y-2">
+                 <h3 className="font-bold text-amber-900 dark:text-amber-100">Troubleshooting</h3>
+                 <p className="text-sm text-amber-800 dark:text-amber-200">
+                    If your GitHub Action build fails with an **"exit code 130"**, it usually means the build was interrupted. The most common reason is that the files generated by `bubblewrap init` were not committed to your repository. Please follow the exported README's instructions carefully.
+                 </p>
+            </div>
         </div>
 
         <div className="p-4 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
@@ -395,7 +419,7 @@ You're all set!
             <p className="text-sm text-slate-600 dark:text-slate-400">
                 This Student Digital Planner helps you organize your academic life. All your data is stored securely on your device.
             </p>
-            <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">Version 2.0.0</p>
+            <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">Version 2.1.0</p>
         </div>
       </div>
     </>
